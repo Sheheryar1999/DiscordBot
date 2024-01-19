@@ -11,7 +11,7 @@ class SetupEmbed(commands.Cog):
         self.bot = bot
         self.database = sqlite3.connect("./Databases/posts.sqlite")
 
-    @commands.command()
+    @commands.command(name='embed')
     async def embed_setup(self, context: commands.Context):
         embed = discord.Embed(
             title="<:white_info:1142840597745520762>⠀Marketplace Information⠀<:white_info:1142840597745520762>",

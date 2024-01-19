@@ -1,6 +1,6 @@
 import db
 import datetime
-from models import Post, PostReport, IncomingPost, OutgoingPost, Warn, Review
+from models import Post, PostReport, IncomingPost, OutgoingPost, Warn, Review, Scammer
 
 db.Base.metadata.create_all(db.engine)
 
@@ -93,7 +93,7 @@ def update_out_going_post_bumped_at(forum_id, bumped_at):
         outgoing_post.bumped_at = bumped_at
         db.session.commit()
 
-def insert_paid_job_post(post_id, user_id, post_title, post_desc, post_payment, post_deadline):
+def insert_paid_job_post(post_id, user_id, post_title, post_desc, post_payment, post_deadline,post_location):
     paid_job_post = Post(
         post_id=post_id,
         user_id=user_id,
@@ -102,6 +102,7 @@ def insert_paid_job_post(post_id, user_id, post_title, post_desc, post_payment, 
         post_desc=post_desc,
         post_payment=post_payment,
         post_deadline=post_deadline,
+        post_location = post_location,
         post_type="paid",
     )
     db.session.add(paid_job_post)
@@ -181,6 +182,14 @@ def update_commission_post(post_id, post_title, post_desc, post_payment, post_de
 
 def insert_user_warn(user_id, reason):
     warn = Warn(
+        user_id=user_id,
+        reason=reason,
+    )
+    db.session.add(warn)
+    db.session.commit()
+
+def insert_user_scam(user_id, reason):
+    warn = Scammer.Scam(
         user_id=user_id,
         reason=reason,
     )

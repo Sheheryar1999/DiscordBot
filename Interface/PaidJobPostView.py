@@ -169,11 +169,12 @@ class PostFinalView(View):
         await interaction.response.edit_message(content="{} Alright, Have a nice day!".format('👋'), view=None)
 
 class PostModal(Modal, title="Create a Paid Job Post"):
-    def __init__(self, _title: str=None, _desc: str=None, _payment: str=None, _deadline: str=None):
+    def __init__(self, _title: str=None, _desc: str=None, _payment: str=None, _deadline: str=None, _location: str=None):
         self._title = _title
         self._desc = _desc
         self._payment = _payment
         self._deadline = _deadline
+        self._location = _location
 
         super().__init__(timeout=None)
 
@@ -209,10 +210,19 @@ class PostModal(Modal, title="Create a Paid Job Post"):
             required=False
         )
 
+        self.post_location = TextInput(
+            label="Preferred Location",
+            placeholder="Enter youre preferred location of applicants",
+            style= TextStyle.short, 
+            default=None if not self._location else self._location,
+            required=False
+        )
+
         self.add_item(self.post_title)
         self.add_item(self.post_desc)
         self.add_item(self.post_payment)
         self.add_item(self.post_deadline)
+        self.add_item(self.post_location)
 
     async def on_submit(self, interaction: discord.Interaction):   
         if self.post_deadline.value:
@@ -225,6 +235,7 @@ class PostModal(Modal, title="Create a Paid Job Post"):
         post_description = self.post_desc.value
         post_payment = self.post_payment.value
         post_deadline = "N/A" if not self.post_deadline.value else self.post_deadline.value
+        post_location = "N/A" if not self.post_location.value else self.post_location.value
 
         post_embed = discord.Embed(
             title=f"{config.PERSON_EMOJI} {post_title}",
@@ -241,9 +252,16 @@ class PostModal(Modal, title="Create a Paid Job Post"):
             value=f"{config.TOP_TO_RIGHT_EMOJI} {post_deadline}",
             inline=True
         )
+
+        post_embed.add_field(
+            name="Location",
+            value=f"{config.TOP_TO_RIGHT_EMOJI} {post_location}",
+            inline=True
+        )
+
         post_embed.set_footer(text="Post ID: {}".format(id))
         post_embed.set_image(url=config.PAID_JOB_BANNER_URL)
-        insert_paid_job_post(id, interaction.user.id, post_title, post_description, post_payment, post_deadline)
+        insert_paid_job_post(id, interaction.user.id, post_title, post_description, post_payment, post_deadline, post_location)
 
         await interaction.response.send_message(embed=post_embed, view=NotificationSelectorView(), ephemeral=True)
 
@@ -288,10 +306,20 @@ class PostEditModal(Modal, title="Create a Paid Job Post"):
             required=False
         )
 
+        self.post_location = TextInput(
+            label="Preferred Location",
+            placeholder="Enter youre preferred location of applicants",
+            style= TextStyle.short, 
+            default=None if not self._location else self._location,
+            required=False
+        )
+
+
         self.add_item(self.post_title)
         self.add_item(self.post_desc)
         self.add_item(self.post_payment)
         self.add_item(self.post_deadline)
+        self.add_item(self.post_location)
 
     async def on_submit(self, interaction: discord.Interaction):
         if self.post_deadline.value:
@@ -305,6 +333,7 @@ class PostEditModal(Modal, title="Create a Paid Job Post"):
             post_description = self.post_desc.value
             post_payment = self.post_payment.value
             post_deadline = "N/A" if not self.post_deadline.value else self.post_deadline.value
+            post_location = "N/A" if not self.post_location.value else self.post_location.value
 
             post_embed = discord.Embed(
                 title=f"{config.PERSON_EMOJI} {post_title}",
@@ -321,10 +350,18 @@ class PostEditModal(Modal, title="Create a Paid Job Post"):
                 value=f"{config.TOP_TO_RIGHT_EMOJI} {post_deadline}",
                 inline=True
             )
+
+            post_embed.add_field(
+                name=f"{config.CLOCK_EMOJI} Location:",
+                value=f"{config.TOP_TO_RIGHT_EMOJI} {post_location}",
+                inline=True
+            )
+
+            
             post_embed.set_footer(text="Post ID: {}".format(post_id))
             post_embed.set_image(url=config.PAID_JOB_BANNER_URL)
             
-            update_paid_job_post(post_id, post_title, post_description, post_payment, post_deadline)
+            update_paid_job_post(post_id, post_title, post_description, post_payment, post_deadline,post_location)
         
             await interaction.response.edit_message(embed=post_embed, view=NotificationSelectorView())
         

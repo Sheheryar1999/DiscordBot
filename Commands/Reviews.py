@@ -80,26 +80,48 @@ class Reviews(commands.Cog):
         self.database.execute("INSERT INTO Reviews VALUES (?, ?, ?, ?, ?)", (freelancer.id, client.id, category.value, rating.value, review,)).connection.commit()
 
         await interaction.response.send_message(embed=review_embed)
-    
+
     @app_commands.command(name="warn", description="Warn User")
     async def warn_give(self, interaction: discord.Interaction, user: discord.Member, reason: str):
         insert_user_warn(user.id, reason)
-        review_embed = discord.Embed(
+        warn_embded = discord.Embed(
             title=f"Warning User",
             color=discord.Color.blue()
         )
-        review_embed.add_field(
+        warn_embded.add_field(
             name="User:",
             value=user.display_name,
             inline=False
         )
-        review_embed.add_field(
+        warn_embded.add_field(
             name="Reason:",
             value=reason,
             inline=False
         )
         
-        await interaction.response.send_message(embed=review_embed)
+        await interaction.response.send_message(embed=warn_embded)
+
+        channel_id = config.USER_WARNING_CHANNEL_ID
+        log_channel = interaction.guild.get_channel(channel_id)
+
+        if log_channel:
+            await log_channel.send(embed=warn_embded)
+            print("Someone done got themselves warned")
+        else:
+            print("Error: Channel with id {channel_id} not found")
+
+    @app_commands.command(name="message", description="Send a message to anyone")
+    async def send_message(self, user: discord.Member, *,  message: str):
+        try:
+            await user.send(message)
+            print(f'Message sent to {user.mention}\'s DM successfully.')
+        except discord.Forbidden:
+            print('Error: I don\'t have permission to send DMs to that user.')
+        except Exception as e:
+            print(f'An error occurred: {e}')
+
+
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Reviews(bot))
